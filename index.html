@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield - Phishing Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --surface-color: #e0e5ec;
+            --text-color: #2d3436;
+            --shadow-dark: #a3b1c6;
+            --shadow-light: #ffffff;
+            --accent-color: #4a90e2;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--surface-color);
+            color: var(--text-color);
+        }
+
+        .neu-inset {
+            background: var(--surface-color);
+            box-shadow: inset 3px 3px 7px var(--shadow-dark),
+                        inset -3px -3px 7px var(--shadow-light);
+        }
+
+        .neu-outset {
+            background: var(--surface-color);
+            box-shadow: 3px 3px 7px var(--shadow-dark),
+                        -3px -3px 7px var(--shadow-light);
+        }
+
+        .neu-button {
+            transition: all 0.2s ease;
+        }
+
+        .neu-button:active {
+            box-shadow: inset 3px 3px 7px var(--shadow-dark),
+                        inset -3px -3px 7px var(--shadow-light);
+        }
+
+        .input-field {
+            border: none;
+            outline: none;
+            background: var(--surface-color);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                        inset -4px -4px 8px var(--shadow-light);
+        }
+
+        .result-card {
+            background: var(--surface-color);
+            border-radius: 20px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: linear-gradient(to right, #4a90e2 50%, var(--surface-color) 50%);
+            border-radius: 5px;
+            box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                        inset -2px -2px 4px var(--shadow-light);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="container mx-auto max-w-4xl">
+        <header class="text-center mb-12">
+            <div class="inline-block neu-outset p-6 rounded-2xl mb-4">
+                <i class="bi bi-shield-check text-4xl text-[#4a90e2]"></i>
+            </div>
+            <h1 class="text-4xl font-bold mb-2">CyberShield</h1>
+            <p class="text-gray-600">Advanced Phishing Detection System</p>
+        </header>
+
+        <div class="neu-outset p-8 rounded-2xl mb-8">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="urlInput" 
+                       placeholder="Enter URL to scan..." 
+                       class="input-field flex-1 p-4 rounded-xl neu-inset">
+                <button onclick="scanURL()" 
+                        class="neu-button px-8 py-4 rounded-xl font-semibold text-[#4a90e2]">
+                    SCAN URL
+                </button>
+            </div>
+        </div>
+
+        <div id="results" class="hidden">
+            <div class="neu-outset p-6 rounded-2xl mb-8">
+                <div id="statusIndicator" class="flex items-center gap-3 mb-6">
+                    <!-- Filled by JavaScript -->
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="neu-inset p-6 rounded-xl">
+                        <h3 class="font-semibold mb-4">Security Checks</h3>
+                        <ul id="securityChecks" class="space-y-3">
+                            <!-- Filled by JavaScript -->
+                        </ul>
+                    </div>
+
+                    <div class="neu-inset p-6 rounded-xl">
+                        <h3 class="font-semibold mb-4">Analysis Details</h3>
+                        <ul id="analysisDetails" class="space-y-3">
+                            <!-- Filled by JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-20 hidden items-center justify-center backdrop-blur-sm">
+        <div class="neu-outset bg-[var(--surface-color)] p-8 rounded-2xl max-w-md w-full mx-4">
+            <h3 id="modalTitle" class="text-2xl font-bold mb-4 text-center"></h3>
+            <p id="modalMessage" class="mb-6 text-center text-gray-600"></p>
+            <div class="flex justify-center gap-4">
+                <button id="modalPrimary" class="neu-button px-6 py-3 rounded-xl font-semibold text-[#4a90e2]">
+                    Proceed
+                </button>
+                <button onclick="closeModal()" class="neu-button px-6 py-3 rounded-xl font-semibold text-red-500">
+                    Exit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function scanURL() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                showModal('Error', 'Please enter a URL to scan', 'error');
+                return;
+            }
+
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('statusIndicator').innerHTML = `
+                <div class="animate-spin text-[#4a90e2]">
+                    <i class="bi bi-arrow-repeat text-2xl"></i>
+                </div>
+                <span>Scanning...</span>
+            `;
+
+            setTimeout(() => {
+                const isSafe = Math.random() > 0.3;
+                displayResults(isSafe, url);
+            }, 2000);
+        }
+
+        function displayResults(isSafe, url) {
+            const statusIndicator = document.getElementById('statusIndicator');
+            const securityChecks = document.getElementById('securityChecks');
+            const analysisDetails = document.getElementById('analysisDetails');
+
+            statusIndicator.innerHTML = isSafe ? 
+                `<div class="neu-outset p-3 rounded-full">
+                    <i class="bi bi-shield-check text-green-500 text-2xl"></i>
+                </div>
+                <span class="text-green-500 font-semibold">Safe to proceed</span>` :
+                `<div class="neu-outset p-3 rounded-full">
+                    <i class="bi bi-shield-x text-red-500 text-2xl"></i>
+                </div>
+                <span class="text-red-500 font-semibold">Potentially dangerous</span>`;
+
+            securityChecks.innerHTML = `
+                <li class="flex items-center gap-2">
+                    <i class="bi ${isSafe ? 'bi-lock text-green-500' : 'bi-unlock text-red-500'}"></i>
+                    SSL Certificate: ${isSafe ? 'Valid' : 'Invalid or Missing'}
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="bi ${isSafe ? 'bi-check-circle text-green-500' : 'bi-x-circle text-red-500'}"></i>
+                    Domain Age: ${isSafe ? '> 1 year' : '< 1 month'}
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="bi ${isSafe ? 'bi-check-circle text-green-500' : 'bi-x-circle text-red-500'}"></i>
+                    Blacklist Status: ${isSafe ? 'Clean' : 'Listed'}
+                </li>
+            `;
+
+            analysisDetails.innerHTML = `
+                <li class="flex items-center gap-2">
+                    <i class="bi bi-info-circle text-[#4a90e2]"></i>
+                    Protocol: ${url.startsWith('https') ? 'HTTPS' : 'HTTP'}
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="bi bi-globe text-[#4a90e2]"></i>
+                    Domain: ${new URL(url.startsWith('http') ? url : 'https://' + url).hostname}
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="bi bi-shield text-[#4a90e2]"></i>
+                    Risk Score: ${isSafe ? '15/100' : '85/100'}
+                </li>
+            `;
+
+            showModal(
+                isSafe ? 'Safe URL Detected' : 'Warning: Suspicious URL',
+                isSafe ? 'This URL appears to be safe. Would you like to proceed?' : 'This URL may be dangerous. We recommend not proceeding.',
+                isSafe ? 'success' : 'error'
+            );
+        }
+
+        function showModal(title, message, type) {
+            const modal = document.getElementById('resultModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalTitle.className = `text-2xl font-bold mb-4 text-center ${type === 'success' ? 'text-green-500' : 'text-red-500'}`;
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
